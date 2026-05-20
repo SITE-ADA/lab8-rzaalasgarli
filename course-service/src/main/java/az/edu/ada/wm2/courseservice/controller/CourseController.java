@@ -13,13 +13,17 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.MediaType;
 
 @RestController
 @RequestMapping("/api/v1/courses")
 @RequiredArgsConstructor
 
 //  UPDATED (Azerbaijani)
-@Tag(name = "Kurslar", description = "Kursların idarə olunması və tələbə qeydiyyatı API-ləri")
+@Tag(
+        name = "Kurs API",
+        description = "Kursların idarə olunması, qeydiyyat və tələbə əməliyyatları"
+)
 public class CourseController {
 
     private final CourseService courseService;
