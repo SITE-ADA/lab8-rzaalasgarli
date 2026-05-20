@@ -34,6 +34,13 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(HttpStatus.CONFLICT, ex.getMessage(), request.getRequestURI());
     }
 
+    @ExceptionHandler(PrerequisiteNotMetException.class)
+    public ResponseEntity<ApiErrorResponse> handlePrerequisiteNotMet(
+            PrerequisiteNotMetException ex,
+            HttpServletRequest request) {
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage(), request.getRequestURI());
+    }
+
     @ExceptionHandler(StudentServiceCommunicationException.class)
     public ResponseEntity<ApiErrorResponse> handleStudentServiceCommunication(
             StudentServiceCommunicationException ex,

@@ -3,6 +3,7 @@ package az.edu.ada.wm2.courseservice.service;
 import az.edu.ada.wm2.courseservice.client.StudentFeignClient;
 import az.edu.ada.wm2.courseservice.exception.CourseNotFoundException;
 import az.edu.ada.wm2.courseservice.exception.EnrollmentAlreadyExistsException;
+import az.edu.ada.wm2.courseservice.exception.PrerequisiteNotMetException;
 import az.edu.ada.wm2.courseservice.exception.RemoteStudentNotFoundException;
 import az.edu.ada.wm2.courseservice.exception.StudentServiceCommunicationException;
 import az.edu.ada.wm2.courseservice.model.dto.CourseRequestDto;
@@ -43,6 +44,7 @@ public class CourseService {
                 .title(requestDto.getTitle())
                 .code(requestDto.getCode())
                 .credits(requestDto.getCredits())
+                .prerequisiteCourseId(requestDto.getPrerequisiteCourseId())
                 .build();
 
         Course savedCourse = courseRepository.save(course);
@@ -67,6 +69,7 @@ public class CourseService {
         existingCourse.setTitle(requestDto.getTitle());
         existingCourse.setCode(requestDto.getCode());
         existingCourse.setCredits(requestDto.getCredits());
+        existingCourse.setPrerequisiteCourseId(requestDto.getPrerequisiteCourseId());
 
         Course updatedCourse = courseRepository.save(existingCourse);
         return toCourseResponseDto(updatedCourse);
@@ -79,10 +82,23 @@ public class CourseService {
 
     public EnrollmentResponseDto enrollStudent(Long courseId, Long studentId) {
         log.debug("Enrolling student {} into course {}", studentId, courseId);
-        findCourseOrThrow(courseId);
+        Course course = findCourseOrThrow(courseId);
 
         if (enrollmentRepository.existsByCourseIdAndStudentId(courseId, studentId)) {
             throw new EnrollmentAlreadyExistsException(courseId, studentId);
+        }
+
+        // Prerequisite check
+        if (course.getPrerequisiteCourseId() != null) {
+            Long prereqId = course.getPrerequisiteCourseId();
+            boolean hasCompleted = enrollmentRepository
+                    .findByStudentId(studentId)
+                    .stream()
+                    .anyMatch(e -> e.getCourseId().equals(prereqId));
+
+            if (!hasCompleted) {
+                throw new PrerequisiteNotMetException(prereqId);
+            }
         }
 
         validateStudentWithFeign(studentId);
@@ -119,6 +135,29 @@ public class CourseService {
         return new CourseStudentsResponseDto(course.getId(), course.getTitle(), students);
     }
 
+    public List<CourseResponseDto> getCoursesByStudentName(String studentName) {
+        log.debug("Fetching courses for student name {}", studentName);
+        String url = studentServiceBaseUrl + "/api/v1/students/search?name=" + studentName;
+        StudentDto[] students;
+        try {
+            students = restTemplate.getForObject(url, StudentDto[].class);
+        } catch (RestClientException ex) {
+            throw new StudentServiceCommunicationException("Could not fetch students from student-service.");
+        }
+
+        if (students == null || students.length == 0) {
+            return List.of();
+        }
+
+        return List.of(students).stream()
+                .flatMap(s -> enrollmentRepository.findByStudentId(s.getId()).stream())
+                .map(Enrollment::getCourseId)
+                .distinct()
+                .map(this::findCourseOrThrow)
+                .map(this::toCourseResponseDto)
+                .toList();
+    }
+
     private void validateStudentWithFeign(Long studentId) {
         try {
             log.debug("Validating student {} via Feign", studentId);
@@ -152,7 +191,8 @@ public class CourseService {
                 course.getId(),
                 course.getTitle(),
                 course.getCode(),
-                course.getCredits()
+                course.getCredits(),
+                course.getPrerequisiteCourseId()
         );
     }
 }

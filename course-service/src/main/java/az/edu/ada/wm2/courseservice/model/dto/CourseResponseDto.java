@@ -1,15 +1,9 @@
 package az.edu.ada.wm2.courseservice.model.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor
 public class CourseResponseDto {
 
     @Schema(description = "Course id", example = "1")
@@ -23,4 +17,7 @@ public class CourseResponseDto {
 
     @Schema(description = "Credit count", example = "4")
     private Integer credits;
+
+    @Schema(description = "Prerequisite course ID", example = "1")
+    private Long prerequisiteCourseId;
 }

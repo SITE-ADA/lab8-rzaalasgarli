@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/api/v1/courses")
@@ -83,4 +84,13 @@ public class CourseController {
     public ResponseEntity<CourseStudentsResponseDto> getCourseStudents(@PathVariable Long courseId) {
         return ResponseEntity.ok(courseService.getCourseStudents(courseId));
     }
+    @GetMapping("/by-student-name")
+@Operation(
+        summary = "Tələbənin adına görə kursları tap",
+        description = "Tələbənin adına görə qeydiyyatda olduğu kursları qaytarır."
+)
+public ResponseEntity<List<CourseResponseDto>> getCoursesByStudentName(
+        @RequestParam String name) {
+    return ResponseEntity.ok(courseService.getCoursesByStudentName(name));
+}
 }
