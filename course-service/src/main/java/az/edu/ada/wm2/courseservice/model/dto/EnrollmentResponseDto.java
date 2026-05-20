@@ -1,15 +1,10 @@
 package az.edu.ada.wm2.courseservice.model.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import java.time.LocalDate;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor
 public class EnrollmentResponseDto {
 
     @Schema(description = "Enrollment id", example = "10")
@@ -20,6 +15,9 @@ public class EnrollmentResponseDto {
 
     @Schema(description = "Student id", example = "15")
     private Long studentId;
+
+    @Schema(description = "Enrollment date", example = "2024-09-01")
+    private LocalDate enrollmentDate;
 
     @Schema(description = "Operation result message", example = "Student enrolled successfully.")
     private String message;

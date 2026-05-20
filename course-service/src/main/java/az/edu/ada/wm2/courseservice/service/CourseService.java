@@ -23,7 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-
+import java.time.LocalDate;
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -86,19 +86,20 @@ public class CourseService {
 
         validateStudentWithFeign(studentId);
 
-        Enrollment enrollment = Enrollment.builder()
-                .courseId(courseId)
-                .studentId(studentId)
-                .build();
-        Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
+      Enrollment enrollment = Enrollment.builder()
+        .courseId(courseId)
+        .studentId(studentId)
+        .enrollmentDate(LocalDate.now())
+        .build();
+Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
 
-        return new EnrollmentResponseDto(
-                savedEnrollment.getId(),
-                savedEnrollment.getCourseId(),
-                savedEnrollment.getStudentId(),
-                "Student enrolled successfully."
-        );
-    }
+return new EnrollmentResponseDto(
+        savedEnrollment.getId(),
+        savedEnrollment.getCourseId(),
+        savedEnrollment.getStudentId(),
+        savedEnrollment.getEnrollmentDate(),
+        "Student enrolled successfully."
+);
 
     public CourseStudentsResponseDto getCourseStudents(Long courseId) {
         log.debug("Fetching students for course {}", courseId);
