@@ -16,6 +16,7 @@ import az.edu.ada.wm2.courseservice.repository.CourseRepository;
 import az.edu.ada.wm2.courseservice.repository.EnrollmentRepository;
 import feign.FeignException;
 import java.util.List;
+import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,7 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-import java.time.LocalDate;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -86,20 +87,21 @@ public class CourseService {
 
         validateStudentWithFeign(studentId);
 
-      Enrollment enrollment = Enrollment.builder()
-        .courseId(courseId)
-        .studentId(studentId)
-        .enrollmentDate(LocalDate.now())
-        .build();
-Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
+        Enrollment enrollment = Enrollment.builder()
+                .courseId(courseId)
+                .studentId(studentId)
+                .enrollmentDate(LocalDate.now())
+                .build();
+        Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
 
-return new EnrollmentResponseDto(
-        savedEnrollment.getId(),
-        savedEnrollment.getCourseId(),
-        savedEnrollment.getStudentId(),
-        savedEnrollment.getEnrollmentDate(),
-        "Student enrolled successfully."
-);
+        return new EnrollmentResponseDto(
+                savedEnrollment.getId(),
+                savedEnrollment.getCourseId(),
+                savedEnrollment.getStudentId(),
+                savedEnrollment.getEnrollmentDate(),
+                "Student enrolled successfully."
+        );
+    }
 
     public CourseStudentsResponseDto getCourseStudents(Long courseId) {
         log.debug("Fetching students for course {}", courseId);
